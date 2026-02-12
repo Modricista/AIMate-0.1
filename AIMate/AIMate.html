@@ -1,0 +1,1068 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>AIT Reference Tool</title>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&family=Exo+2:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-primary: #0a0e1a;
+    --bg-secondary: #111827;
+    --bg-card: #1a2236;
+    --bg-card-hover: #1f2a42;
+    --accent-blue: #3b82f6;
+    --accent-cyan: #06b6d4;
+    --accent-amber: #f59e0b;
+    --accent-green: #10b981;
+    --accent-red: #ef4444;
+    --accent-purple: #8b5cf6;
+    --text-primary: #e2e8f0;
+    --text-secondary: #94a3b8;
+    --text-muted: #64748b;
+    --border: #1e293b;
+    --border-light: #334155;
+    --glow-blue: rgba(59, 130, 246, 0.15);
+    --glow-cyan: rgba(6, 182, 212, 0.15);
+  }
+
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    font-family: 'Exo 2', sans-serif;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* === BACKGROUND EFFECTS === */
+  .bg-grid {
+    position: fixed;
+    inset: 0;
+    background-image: 
+      linear-gradient(rgba(59, 130, 246, 0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(59, 130, 246, 0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .bg-glow {
+    position: fixed;
+    top: -30%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(circle, rgba(59, 130, 246, 0.08) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* === HEADER === */
+  .header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(10, 14, 26, 0.85);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+    padding: 12px 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .header-back {
+    display: none;
+    background: none;
+    border: none;
+    color: var(--accent-cyan);
+    font-size: 22px;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 6px;
+    transition: background 0.2s;
+  }
+
+  .header-back:active {
+    background: rgba(6, 182, 212, 0.1);
+  }
+
+  .header-back.visible {
+    display: block;
+  }
+
+  .header-logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 1;
+  }
+
+  .header-icon {
+    width: 36px;
+    height: 36px;
+    background: linear-gradient(135deg, var(--accent-blue), var(--accent-cyan));
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+
+  .header-title {
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 700;
+    font-size: 18px;
+    letter-spacing: 0.5px;
+    line-height: 1.1;
+  }
+
+  .header-subtitle {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    color: var(--text-muted);
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+  }
+
+  /* === MAIN CONTENT === */
+  .content {
+    position: relative;
+    z-index: 1;
+    padding: 20px;
+    max-width: 500px;
+    margin: 0 auto;
+  }
+
+  /* === SCREEN TRANSITIONS === */
+  .screen {
+    display: none;
+    animation: fadeSlideIn 0.3s ease-out;
+  }
+
+  .screen.active {
+    display: block;
+  }
+
+  @keyframes fadeSlideIn {
+    from { opacity: 0; transform: translateY(15px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* === HOME SCREEN === */
+  .welcome-text {
+    text-align: center;
+    margin-bottom: 28px;
+    padding-top: 10px;
+  }
+
+  .welcome-text h2 {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 22px;
+    font-weight: 600;
+    margin-bottom: 6px;
+  }
+
+  .welcome-text p {
+    color: var(--text-secondary);
+    font-size: 13px;
+    font-weight: 300;
+  }
+
+  /* === AIRCRAFT CARDS === */
+  .aircraft-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .aircraft-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 20px;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .aircraft-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    border-radius: 14px 0 0 14px;
+    transition: width 0.25s ease;
+  }
+
+  .aircraft-card:active {
+    transform: scale(0.98);
+    background: var(--bg-card-hover);
+  }
+
+  .aircraft-card[data-ac="b777"]::before { background: var(--accent-blue); }
+  .aircraft-card[data-ac="b787"]::before { background: var(--accent-cyan); }
+  .aircraft-card[data-ac="a320"]::before { background: var(--accent-green); }
+  .aircraft-card[data-ac="a330"]::before { background: var(--accent-amber); }
+  .aircraft-card[data-ac="tbd"]::before { background: var(--accent-purple); }
+
+  .ac-icon {
+    width: 52px;
+    height: 52px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    flex-shrink: 0;
+  }
+
+  .aircraft-card[data-ac="b777"] .ac-icon { background: rgba(59, 130, 246, 0.12); }
+  .aircraft-card[data-ac="b787"] .ac-icon { background: rgba(6, 182, 212, 0.12); }
+  .aircraft-card[data-ac="a320"] .ac-icon { background: rgba(16, 185, 129, 0.12); }
+  .aircraft-card[data-ac="a330"] .ac-icon { background: rgba(245, 158, 11, 0.12); }
+  .aircraft-card[data-ac="tbd"] .ac-icon { background: rgba(139, 92, 246, 0.12); }
+
+  .ac-info {
+    flex: 1;
+  }
+
+  .ac-name {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+  }
+
+  .ac-desc {
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin-top: 2px;
+  }
+
+  .ac-arrow {
+    color: var(--text-muted);
+    font-size: 18px;
+    transition: transform 0.2s;
+  }
+
+  .aircraft-card:active .ac-arrow {
+    transform: translateX(3px);
+  }
+
+  /* === AIRCRAFT DETAIL SCREEN === */
+  .ac-detail-header {
+    text-align: center;
+    margin-bottom: 24px;
+    padding-top: 8px;
+  }
+
+  .ac-detail-header h2 {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 26px;
+    font-weight: 700;
+    letter-spacing: 1px;
+  }
+
+  .ac-detail-header .ac-badge {
+    display: inline-block;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    padding: 3px 12px;
+    border-radius: 20px;
+    margin-top: 6px;
+    letter-spacing: 1px;
+  }
+
+  .category-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  .category-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 20px 16px;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .category-card:active {
+    transform: scale(0.96);
+    background: var(--bg-card-hover);
+  }
+
+  .cat-icon {
+    font-size: 30px;
+    margin-bottom: 10px;
+    display: block;
+  }
+
+  .cat-name {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+  }
+
+  .cat-subtitle {
+    font-size: 10px;
+    color: var(--text-muted);
+    margin-top: 4px;
+    font-family: 'Share Tech Mono', monospace;
+    letter-spacing: 0.5px;
+  }
+
+  /* Full-width last card if odd number */
+  .category-grid .category-card:last-child:nth-child(odd) {
+    grid-column: 1 / -1;
+  }
+
+  /* === REFERENCE CONTENT SCREEN === */
+  .ref-header {
+    margin-bottom: 20px;
+    padding-top: 8px;
+  }
+
+  .ref-header h2 {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 22px;
+    font-weight: 700;
+  }
+
+  .ref-header p {
+    color: var(--text-secondary);
+    font-size: 12px;
+    margin-top: 4px;
+  }
+
+  /* Search bar */
+  .search-bar {
+    position: relative;
+    margin-bottom: 16px;
+  }
+
+  .search-bar input {
+    width: 100%;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 16px 12px 42px;
+    color: var(--text-primary);
+    font-family: 'Exo 2', sans-serif;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .search-bar input:focus {
+    border-color: var(--accent-blue);
+  }
+
+  .search-bar input::placeholder {
+    color: var(--text-muted);
+  }
+
+  .search-bar .search-icon {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+    font-size: 16px;
+  }
+
+  /* Reference items */
+  .ref-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .ref-item {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 16px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .ref-item:active {
+    background: var(--bg-card-hover);
+    transform: scale(0.98);
+  }
+
+  .ref-item-title {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    margin-bottom: 3px;
+  }
+
+  .ref-item-code {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    color: var(--accent-cyan);
+    letter-spacing: 0.5px;
+  }
+
+  .ref-item-desc {
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin-top: 4px;
+    line-height: 1.4;
+  }
+
+  /* Detail view for a single reference */
+  .ref-detail-content {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 20px;
+    margin-top: 12px;
+  }
+
+  .ref-detail-content h3 {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 12px;
+    color: var(--accent-cyan);
+  }
+
+  .ref-detail-content p,
+  .ref-detail-content li {
+    font-size: 13px;
+    line-height: 1.7;
+    color: var(--text-secondary);
+  }
+
+  .ref-detail-content ul {
+    padding-left: 18px;
+    margin: 8px 0;
+  }
+
+  .ref-detail-content li {
+    margin-bottom: 4px;
+  }
+
+  .ref-tag {
+    display: inline-block;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 4px;
+    margin-right: 6px;
+    margin-bottom: 6px;
+    background: rgba(59, 130, 246, 0.12);
+    color: var(--accent-blue);
+    letter-spacing: 0.5px;
+  }
+
+  /* === EMPTY / PLACEHOLDER STATE === */
+  .placeholder-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--text-muted);
+  }
+
+  .placeholder-state .placeholder-icon {
+    font-size: 48px;
+    margin-bottom: 16px;
+    opacity: 0.5;
+  }
+
+  .placeholder-state h3 {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 18px;
+    color: var(--text-secondary);
+    margin-bottom: 6px;
+  }
+
+  .placeholder-state p {
+    font-size: 13px;
+    line-height: 1.5;
+  }
+
+  /* === FOOTER BAR === */
+  .footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    background: rgba(10, 14, 26, 0.9);
+    backdrop-filter: blur(20px);
+    border-top: 1px solid var(--border);
+    padding: 8px 20px 20px;
+    display: flex;
+    justify-content: space-around;
+  }
+
+  .footer-btn {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-family: 'Exo 2', sans-serif;
+    font-size: 10px;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 12px;
+    border-radius: 8px;
+    transition: color 0.2s;
+  }
+
+  .footer-btn .f-icon {
+    font-size: 20px;
+  }
+
+  .footer-btn.active {
+    color: var(--accent-cyan);
+  }
+
+  /* Bottom padding for content to avoid footer overlap */
+  .content {
+    padding-bottom: 90px;
+  }
+
+  /* === STAGGER ANIMATION FOR CARDS === */
+  .stagger-item {
+    opacity: 0;
+    animation: fadeSlideIn 0.35s ease-out forwards;
+  }
+
+  .stagger-item:nth-child(1) { animation-delay: 0.05s; }
+  .stagger-item:nth-child(2) { animation-delay: 0.1s; }
+  .stagger-item:nth-child(3) { animation-delay: 0.15s; }
+  .stagger-item:nth-child(4) { animation-delay: 0.2s; }
+  .stagger-item:nth-child(5) { animation-delay: 0.25s; }
+  .stagger-item:nth-child(6) { animation-delay: 0.3s; }
+
+  /* === COPYRIGHT === */
+  .copyright {
+    position: fixed;
+    bottom: 68px;
+    right: 16px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 9px;
+    color: var(--text-muted);
+    opacity: 0.5;
+    letter-spacing: 0.5px;
+    z-index: 101;
+  }
+</style>
+</head>
+<body>
+
+<div class="bg-grid"></div>
+<div class="bg-glow"></div>
+
+<!-- HEADER -->
+<div class="header">
+  <button class="header-back" id="backBtn" onclick="goBack()">‹</button>
+  <div class="header-logo">
+    <div class="header-icon">✈</div>
+    <div>
+      <div class="header-title">AIT REF TOOL</div>
+      <div class="header-subtitle">Aircraft Interior Tech</div>
+    </div>
+  </div>
+</div>
+
+<!-- CONTENT -->
+<div class="content">
+
+  <!-- SCREEN 1: HOME - Aircraft Selection -->
+  <div class="screen active" id="screen-home">
+    <div class="welcome-text">
+      <h2>Select Aircraft</h2>
+      <p>Choose an aircraft type to view references</p>
+    </div>
+    <div class="aircraft-grid">
+      <div class="aircraft-card stagger-item" data-ac="b777" onclick="selectAircraft('b777')">
+        <div class="ac-icon">✈</div>
+        <div class="ac-info">
+          <div class="ac-name">BOEING 777</div>
+          <div class="ac-desc">Wide-body twin-engine</div>
+        </div>
+        <div class="ac-arrow">›</div>
+      </div>
+      <div class="aircraft-card stagger-item" data-ac="b787" onclick="selectAircraft('b787')">
+        <div class="ac-icon">✈</div>
+        <div class="ac-info">
+          <div class="ac-name">BOEING 787</div>
+          <div class="ac-desc">Dreamliner</div>
+        </div>
+        <div class="ac-arrow">›</div>
+      </div>
+      <div class="aircraft-card stagger-item" data-ac="a320" onclick="selectAircraft('a320')">
+        <div class="ac-icon">✈</div>
+        <div class="ac-info">
+          <div class="ac-name">A320 FAMILY</div>
+          <div class="ac-desc">A318 / A319 / A320 / A321</div>
+        </div>
+        <div class="ac-arrow">›</div>
+      </div>
+      <div class="aircraft-card stagger-item" data-ac="a330" onclick="selectAircraft('a330')">
+        <div class="ac-icon">✈</div>
+        <div class="ac-info">
+          <div class="ac-name">AIRBUS A330</div>
+          <div class="ac-desc">Wide-body twin-engine</div>
+        </div>
+        <div class="ac-arrow">›</div>
+      </div>
+      <div class="aircraft-card stagger-item" data-ac="tbd" onclick="selectAircraft('tbd')">
+        <div class="ac-icon">➕</div>
+        <div class="ac-info">
+          <div class="ac-name">COMING SOON</div>
+          <div class="ac-desc">Reserved for future aircraft</div>
+        </div>
+        <div class="ac-arrow">›</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCREEN 2: Aircraft Detail - Category Selection -->
+  <div class="screen" id="screen-aircraft">
+    <div class="ac-detail-header">
+      <h2 id="acDetailName"></h2>
+      <div class="ac-badge" id="acBadge"></div>
+    </div>
+    <div class="category-grid">
+      <div class="category-card stagger-item" onclick="selectCategory('amm')">
+        <span class="cat-icon">📖</span>
+        <div class="cat-name">AMM References</div>
+        <div class="cat-subtitle">Maintenance Manual</div>
+      </div>
+      <div class="category-card stagger-item" onclick="selectCategory('mel')">
+        <span class="cat-icon">📋</span>
+        <div class="cat-name">MEL References</div>
+        <div class="cat-subtitle">Min. Equipment List</div>
+      </div>
+      <div class="category-card stagger-item" onclick="selectCategory('nef')">
+        <span class="cat-icon">📑</span>
+        <div class="cat-name">NEF References</div>
+        <div class="cat-subtitle">Non-Essential Furn.</div>
+      </div>
+      <div class="category-card stagger-item" onclick="selectCategory('tutorials')">
+        <span class="cat-icon">🎓</span>
+        <div class="cat-name">Tutorials</div>
+        <div class="cat-subtitle">New Worker Guides</div>
+      </div>
+      <div class="category-card stagger-item" onclick="selectCategory('troubleshoot')">
+        <span class="cat-icon">🔧</span>
+        <div class="cat-name">Troubleshooting</div>
+        <div class="cat-subtitle">Common Issues</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCREEN 3: Reference List -->
+  <div class="screen" id="screen-refs">
+    <div class="ref-header">
+      <h2 id="refTitle"></h2>
+      <p id="refSubtitle"></p>
+    </div>
+    <div class="search-bar">
+      <span class="search-icon">🔍</span>
+      <input type="text" id="searchInput" placeholder="Search references..." oninput="filterRefs()">
+    </div>
+    <div class="ref-list" id="refList"></div>
+  </div>
+
+  <!-- SCREEN 4: Reference Detail -->
+  <div class="screen" id="screen-detail">
+    <div class="ref-header">
+      <h2 id="detailTitle"></h2>
+      <p id="detailCode"></p>
+    </div>
+    <div id="detailTags"></div>
+    <div class="ref-detail-content" id="detailContent"></div>
+  </div>
+
+</div>
+
+<!-- COPYRIGHT -->
+<div class="copyright">© Abdullah Alghamdi</div>
+
+<!-- FOOTER NAV -->
+<div class="footer">
+  <button class="footer-btn active" onclick="goHome()">
+    <span class="f-icon">🏠</span>
+    Home
+  </button>
+  <button class="footer-btn" onclick="goHome()">
+    <span class="f-icon">🔍</span>
+    Search
+  </button>
+  <button class="footer-btn" onclick="goHome()">
+    <span class="f-icon">⭐</span>
+    Saved
+  </button>
+</div>
+
+<script>
+// === APP STATE ===
+let currentScreen = 'home';
+let screenHistory = [];
+let currentAircraft = null;
+let currentCategory = null;
+
+// === AIRCRAFT DATA ===
+const aircraftData = {
+  b777: { 
+    name: 'BOEING 777', 
+    badge: 'B777', 
+    badgeColor: 'rgba(59, 130, 246, 0.15)', 
+    badgeBorder: 'var(--accent-blue)',
+    textColor: 'var(--accent-blue)' 
+  },
+  b787: { 
+    name: 'BOEING 787', 
+    badge: 'B787 DREAMLINER', 
+    badgeColor: 'rgba(6, 182, 212, 0.15)', 
+    badgeBorder: 'var(--accent-cyan)',
+    textColor: 'var(--accent-cyan)' 
+  },
+  a320: { 
+    name: 'A320 FAMILY', 
+    badge: 'A318/A319/A320/A321', 
+    badgeColor: 'rgba(16, 185, 129, 0.15)', 
+    badgeBorder: 'var(--accent-green)',
+    textColor: 'var(--accent-green)' 
+  },
+  a330: { 
+    name: 'AIRBUS A330', 
+    badge: 'A330', 
+    badgeColor: 'rgba(245, 158, 11, 0.15)', 
+    badgeBorder: 'var(--accent-amber)',
+    textColor: 'var(--accent-amber)' 
+  },
+  tbd: { 
+    name: 'COMING SOON', 
+    badge: 'TBD', 
+    badgeColor: 'rgba(139, 92, 246, 0.15)', 
+    badgeBorder: 'var(--accent-purple)',
+    textColor: 'var(--accent-purple)' 
+  }
+};
+
+// === SAMPLE REFERENCE DATA ===
+// This is placeholder data — you will fill this in with real references
+const refData = {
+  b777: {
+    amm: [
+      { title: 'Passenger Seat Removal/Installation', code: 'AMM 25-10-11', desc: 'Economy class seat R&I procedures' },
+      { title: 'Overhead Bin Latch Adjustment', code: 'AMM 25-25-01', desc: 'Stowage bin latch mechanism adjustment' },
+      { title: 'Lavatory Door Mechanism', code: 'AMM 25-40-11', desc: 'Lav door hinge and lock R&I' },
+      { title: 'Galley Cart Stop Replacement', code: 'AMM 25-30-01', desc: 'Cart stop and roller replacement' },
+      { title: 'PSU Panel Removal', code: 'AMM 25-22-01', desc: 'Passenger Service Unit panel R&I' },
+      { title: 'Carpet Replacement', code: 'AMM 25-50-11', desc: 'Floor covering removal and installation' },
+    ],
+    mel: [
+      { title: 'Passenger Reading Light', code: 'MEL 33-10-01', desc: 'Individual reading light inoperative — dispatch conditions' },
+      { title: 'Lavatory Smoke Detector', code: 'MEL 26-12-01', desc: 'Smoke detector dispatch requirements' },
+      { title: 'Overhead Bin Light', code: 'MEL 33-11-01', desc: 'Stowage compartment light inop' },
+      { title: 'IFE Seatback Screen', code: 'MEL 23-50-01', desc: 'In-flight entertainment screen inop limits' },
+    ],
+    nef: [
+      { title: 'Tray Table', code: 'NEF 25-10-21', desc: 'Passenger tray table broken or missing' },
+      { title: 'Armrest / Aisle Guard', code: 'NEF 25-10-22', desc: 'Armrest cap or aisle guard damage' },
+      { title: 'Window Shade', code: 'NEF 25-20-11', desc: 'Window shade inoperative or missing' },
+      { title: 'Literature Pocket', code: 'NEF 25-10-23', desc: 'Seat back literature pocket damage' },
+      { title: 'Lavatory Mirror', code: 'NEF 25-40-21', desc: 'Lavatory mirror cracked or missing' },
+    ],
+    tutorials: [
+      { title: 'Interior Inspection Walk-Through', code: 'TUT-001', desc: 'Step-by-step cabin inspection for new technicians' },
+      { title: 'Seat Track & Fitting Basics', code: 'TUT-002', desc: 'Understanding seat tracks, fittings, and strike plates' },
+      { title: 'Galley Equipment Overview', code: 'TUT-003', desc: 'Introduction to galley inserts, cart lifts, and water systems' },
+      { title: 'Safety Equipment Locations', code: 'TUT-004', desc: 'Fire extinguisher, PBE, first aid kit locations' },
+    ],
+    troubleshoot: [
+      { title: 'Seat Won\'t Lock in Track', code: 'TS-001', desc: 'Common causes and fixes for seat locking issues' },
+      { title: 'Overhead Bin Won\'t Stay Closed', code: 'TS-002', desc: 'Latch, damper, and hinge troubleshooting' },
+      { title: 'Lav Door Sticking or Jamming', code: 'TS-003', desc: 'Door alignment and hinge pin troubleshooting' },
+      { title: 'IFE Screen No Power', code: 'TS-004', desc: 'Common power issues with seatback screens' },
+    ]
+  },
+  b787: {
+    amm: [
+      { title: 'Passenger Seat Removal/Installation', code: 'AMM 25-10-11', desc: 'Economy class seat R&I procedures' },
+      { title: 'Electronic Window Dimming', code: 'AMM 25-20-41', desc: 'Electrochromic window shade system' },
+      { title: 'LED Mood Lighting Module', code: 'AMM 33-40-01', desc: 'Cabin LED lighting module R&I' },
+      { title: 'Overhead Bin Damper', code: 'AMM 25-25-11', desc: 'Stowage bin damper replacement' },
+    ],
+    mel: [
+      { title: 'Electronic Window Shade', code: 'MEL 25-20-41', desc: 'Electrochromic window inoperative — dispatch' },
+      { title: 'Cabin Mood Lighting Zone', code: 'MEL 33-40-01', desc: 'LED mood lighting zone failure' },
+      { title: 'Lavatory Call Light', code: 'MEL 33-12-01', desc: 'Lav call/occupied light inop' },
+    ],
+    nef: [
+      { title: 'Tray Table', code: 'NEF 25-10-21', desc: 'Passenger tray table broken or missing' },
+      { title: 'USB Power Outlet', code: 'NEF 25-60-01', desc: 'USB charging port inoperative' },
+      { title: 'Window Surround Panel', code: 'NEF 25-20-12', desc: 'Window surround trim damage' },
+    ],
+    tutorials: [
+      { title: '787 Cabin Unique Features', code: 'TUT-101', desc: 'Electrochromic windows, LED lighting, composite panels' },
+      { title: 'Interior Inspection Walk-Through', code: 'TUT-001', desc: 'Step-by-step cabin inspection for new technicians' },
+    ],
+    troubleshoot: [
+      { title: 'E-Window Won\'t Dim', code: 'TS-101', desc: 'Electrochromic window troubleshooting steps' },
+      { title: 'LED Lighting Color Stuck', code: 'TS-102', desc: 'Mood lighting zone not changing color' },
+    ]
+  },
+  a320: {
+    amm: [
+      { title: 'Passenger Seat Removal/Installation', code: 'AMM 25-10-11', desc: 'Economy class seat R&I procedures' },
+      { title: 'Overhead Bin Latch & Damper', code: 'AMM 25-25-01', desc: 'Pivot bin latch and damper R&I' },
+      { title: 'Cabin Partition Panel', code: 'AMM 25-60-01', desc: 'Class divider curtain and partition R&I' },
+      { title: 'Floor Panel Access', code: 'AMM 25-50-01', desc: 'Cabin floor panel removal for access' },
+    ],
+    mel: [
+      { title: 'Passenger Oxygen Mask', code: 'MEL 35-10-01', desc: 'Drop-down oxygen mask dispatch conditions' },
+      { title: 'Emergency Lighting', code: 'MEL 33-50-01', desc: 'Emergency floor path lighting inop' },
+      { title: 'Reading Light', code: 'MEL 33-10-01', desc: 'Individual reading light inoperative' },
+    ],
+    nef: [
+      { title: 'Tray Table', code: 'NEF 25-10-21', desc: 'Passenger tray table broken or missing' },
+      { title: 'Armrest Pad', code: 'NEF 25-10-22', desc: 'Armrest cushion or cap damage' },
+      { title: 'Window Shade', code: 'NEF 25-20-11', desc: 'Manual window shade inop or missing' },
+    ],
+    tutorials: [
+      { title: 'A320 Cabin Layout Overview', code: 'TUT-201', desc: 'Single-aisle cabin zones and station numbers' },
+      { title: 'Interior Inspection Walk-Through', code: 'TUT-001', desc: 'Step-by-step cabin inspection for new technicians' },
+    ],
+    troubleshoot: [
+      { title: 'Overhead Bin Won\'t Latch', code: 'TS-201', desc: 'Pivot bin catch and alignment issues' },
+      { title: 'Seat Recline Stuck', code: 'TS-202', desc: 'Recline mechanism troubleshooting' },
+    ]
+  },
+  a330: {
+    amm: [
+      { title: 'Passenger Seat Removal/Installation', code: 'AMM 25-10-11', desc: 'Economy seat R&I procedures' },
+      { title: 'Overhead Bin Latch', code: 'AMM 25-25-01', desc: 'Stowage bin latch mechanism' },
+      { title: 'Galley Structure & Inserts', code: 'AMM 25-30-11', desc: 'Galley module and insert R&I' },
+      { title: 'Crew Rest Compartment', code: 'AMM 25-60-11', desc: 'Crew rest bunk and access panel' },
+    ],
+    mel: [
+      { title: 'IFE System', code: 'MEL 23-50-01', desc: 'In-flight entertainment dispatch limits' },
+      { title: 'Cabin Pressure Controller', code: 'MEL 21-30-01', desc: 'Cabin altitude controller dispatch' },
+      { title: 'Reading Light', code: 'MEL 33-10-01', desc: 'Individual reading light inoperative' },
+    ],
+    nef: [
+      { title: 'Tray Table', code: 'NEF 25-10-21', desc: 'Passenger tray table broken or missing' },
+      { title: 'IFE Remote/Handset', code: 'NEF 25-60-02', desc: 'Seatback IFE controller inop' },
+      { title: 'Footrest', code: 'NEF 25-10-24', desc: 'Passenger footrest inoperative' },
+    ],
+    tutorials: [
+      { title: 'A330 Wide-Body Cabin Layout', code: 'TUT-301', desc: 'Cabin zones, doors, and galley positions' },
+      { title: 'Interior Inspection Walk-Through', code: 'TUT-001', desc: 'Step-by-step cabin inspection for new technicians' },
+    ],
+    troubleshoot: [
+      { title: 'Galley Power Issue', code: 'TS-301', desc: 'Galley insert no power troubleshooting' },
+      { title: 'Overhead Bin Damper Weak', code: 'TS-302', desc: 'Bin opens too fast or won\'t stay up' },
+    ]
+  },
+  tbd: {}
+};
+
+// === CATEGORY NAMES ===
+const categoryNames = {
+  amm: 'AMM References',
+  mel: 'MEL References',
+  nef: 'NEF References',
+  tutorials: 'Tutorials',
+  troubleshoot: 'Troubleshooting'
+};
+
+// === NAVIGATION ===
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-' + id).classList.add('active');
+  
+  const backBtn = document.getElementById('backBtn');
+  backBtn.classList.toggle('visible', id !== 'home');
+  
+  currentScreen = id;
+  window.scrollTo(0, 0);
+}
+
+function goBack() {
+  if (screenHistory.length > 0) {
+    const prev = screenHistory.pop();
+    showScreen(prev);
+  } else {
+    showScreen('home');
+  }
+}
+
+function goHome() {
+  screenHistory = [];
+  currentAircraft = null;
+  currentCategory = null;
+  showScreen('home');
+}
+
+// === SELECT AIRCRAFT ===
+function selectAircraft(ac) {
+  if (ac === 'tbd') {
+    // Show placeholder for TBD
+    currentAircraft = ac;
+    screenHistory.push('home');
+    
+    const acData = aircraftData[ac];
+    document.getElementById('acDetailName').textContent = acData.name;
+    const badge = document.getElementById('acBadge');
+    badge.textContent = acData.badge;
+    badge.style.background = acData.badgeColor;
+    badge.style.color = acData.textColor;
+    badge.style.border = '1px solid ' + acData.badgeBorder;
+
+    showScreen('aircraft');
+    return;
+  }
+
+  currentAircraft = ac;
+  screenHistory.push('home');
+  
+  const acData = aircraftData[ac];
+  document.getElementById('acDetailName').textContent = acData.name;
+  const badge = document.getElementById('acBadge');
+  badge.textContent = acData.badge;
+  badge.style.background = acData.badgeColor;
+  badge.style.color = acData.textColor;
+  badge.style.border = '1px solid ' + acData.badgeBorder;
+
+  showScreen('aircraft');
+}
+
+// === SELECT CATEGORY ===
+function selectCategory(cat) {
+  if (!currentAircraft || currentAircraft === 'tbd') return;
+  
+  currentCategory = cat;
+  screenHistory.push('aircraft');
+  
+  const acData = aircraftData[currentAircraft];
+  document.getElementById('refTitle').textContent = categoryNames[cat];
+  document.getElementById('refSubtitle').textContent = acData.name + ' — ' + categoryNames[cat];
+  
+  renderRefList(refData[currentAircraft][cat] || []);
+  document.getElementById('searchInput').value = '';
+  showScreen('refs');
+}
+
+// === RENDER REFERENCE LIST ===
+let currentRefItems = [];
+
+function renderRefList(items) {
+  currentRefItems = items;
+  const list = document.getElementById('refList');
+  
+  if (items.length === 0) {
+    list.innerHTML = `
+      <div class="placeholder-state">
+        <div class="placeholder-icon">📭</div>
+        <h3>No References Yet</h3>
+        <p>References for this section will be added soon.</p>
+      </div>`;
+    return;
+  }
+
+  list.innerHTML = items.map((item, i) => `
+    <div class="ref-item stagger-item" onclick="showDetail(${i})">
+      <div class="ref-item-code">${item.code}</div>
+      <div class="ref-item-title">${item.title}</div>
+      <div class="ref-item-desc">${item.desc}</div>
+    </div>
+  `).join('');
+}
+
+// === FILTER / SEARCH ===
+function filterRefs() {
+  const query = document.getElementById('searchInput').value.toLowerCase();
+  const filtered = currentRefItems.filter(item =>
+    item.title.toLowerCase().includes(query) ||
+    item.code.toLowerCase().includes(query) ||
+    item.desc.toLowerCase().includes(query)
+  );
+  
+  const list = document.getElementById('refList');
+  if (filtered.length === 0) {
+    list.innerHTML = `
+      <div class="placeholder-state">
+        <div class="placeholder-icon">🔍</div>
+        <h3>No Results</h3>
+        <p>Try a different search term.</p>
+      </div>`;
+    return;
+  }
+
+  list.innerHTML = filtered.map((item, i) => {
+    const origIndex = currentRefItems.indexOf(item);
+    return `
+      <div class="ref-item" onclick="showDetail(${origIndex})">
+        <div class="ref-item-code">${item.code}</div>
+        <div class="ref-item-title">${item.title}</div>
+        <div class="ref-item-desc">${item.desc}</div>
+      </div>`;
+  }).join('');
+}
+
+// === SHOW DETAIL ===
+function showDetail(index) {
+  const item = currentRefItems[index];
+  if (!item) return;
+  
+  screenHistory.push('refs');
+  
+  document.getElementById('detailTitle').textContent = item.title;
+  document.getElementById('detailCode').textContent = item.code + ' — ' + aircraftData[currentAircraft].name;
+  
+  document.getElementById('detailTags').innerHTML = `
+    <span class="ref-tag">${currentCategory.toUpperCase()}</span>
+    <span class="ref-tag">${aircraftData[currentAircraft].badge}</span>
+  `;
+
+  // Placeholder detail content — you'll replace this with real procedures
+  document.getElementById('detailContent').innerHTML = `
+    <h3>${item.title}</h3>
+    <p>${item.desc}</p>
+    <br>
+    <p style="color: var(--text-muted); font-style: italic;">
+      Detailed procedure content will be added here. This will include step-by-step instructions, 
+      part numbers, tool requirements, and any relevant notes or cautions.
+    </p>
+  `;
+
+  showScreen('detail');
+}
+</script>
+</body>
+</html>
